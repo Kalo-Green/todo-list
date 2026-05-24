@@ -4,7 +4,9 @@ const todoForm = document.getElementById("todo-form");
 const todoInput = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
 
-let tasks = [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+console.log("localstorage : " + localStorage.getItem("tasks"));
+
 
 let editMode = false;
 let editTaskId = null;
@@ -34,10 +36,16 @@ todoForm.addEventListener("submit", (e) => {
     }
 
     todoInput.value = "";
+    saveTasks();
     renderTasks();
     // Place le curseur directement dans l'input pour faciliter la modification
     todoInput.focus();
 });
+
+// SAVE
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 // TASK DISPLAY
 function renderTasks() {
@@ -50,7 +58,7 @@ function renderTasks() {
             li.classList.add("completed");
         }
 
-        // TASK CONTENT
+        // TASK CONTENT (checkbox + text)
         const taskContent = document.createElement("div");
         taskContent.className = "task-content";
 
@@ -66,13 +74,13 @@ function renderTasks() {
 
         checkbox.addEventListener("change", () => {
             task.completed = checkbox.checked;
+            saveTasks();
             renderTasks();
         });
 
         label.appendChild(checkbox);
         label.appendChild(spanCheck);
 
-        // TEXT
         const span = document.createElement("span");
         span.className = "task-text";
         span.textContent = task.text;
@@ -103,6 +111,7 @@ function renderTasks() {
 
         deleteBtn.addEventListener("click", () => {
             tasks = tasks.filter(t => t.id !== task.id);
+            saveTasks();
             renderTasks();
         });
 
@@ -117,6 +126,4 @@ function renderTasks() {
 
     console.log(tasks);
     
-    
 }
-
