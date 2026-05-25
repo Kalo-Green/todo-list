@@ -1,53 +1,53 @@
 "use strict";
 
+/* ===== DOM ELEMENTS ===== */
 const todoForm = document.getElementById("todo-form");
 const todoInput = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
 
+
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-console.log("localstorage : " + localStorage.getItem("tasks"));
-
-
 let editMode = false;
 let editTaskId = null;
 
-renderTasks();
 
-// ADD / UPDATE
-todoForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const text = todoInput.value.trim();
-    if (!text) return;
-
-    if (editMode) {
-        const task = tasks.find(t => t.id === editTaskId);
-        if (task) task.text = text;
-
-        editMode = false;
-        editTaskId = null;
-
-    } else {
-        tasks.push({
-            id: Date.now(),
-            text,
-            completed: false
-        });
-    }
-
-    todoInput.value = "";
-    saveTasks();
-    renderTasks();
-    // Place le curseur directement dans l'input pour faciliter la modification
-    todoInput.focus();
-});
-
-// SAVE
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// TASK DISPLAY
+function addTask(text) {
+    tasks.push({
+        id: Date.now(),
+        text,
+        completed: false
+    });
+}
+
+function updateTask(id, newText) {
+    const task = tasks.find(t => t.id === id);
+    if (task) task.text = newText;
+}
+
+function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+}
+
+function toggleTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+        task.completed = !task.completed;
+    }
+}
+
+function openEditTask(task) {
+    todoInput.value = task.text;
+    editMode = true;
+    editTaskId = task.id;
+    todoInput.focus();
+}
+
+
+/* ===== TASK DISPLAY ===== */
 function renderTasks() {
     todoList.innerHTML = "";
 
@@ -62,7 +62,6 @@ function renderTasks() {
         const taskContent = document.createElement("div");
         taskContent.className = "task-content";
 
-        // CHECKBOX LABEL
         const label = document.createElement("label");
         label.className = "checkbox";
 
@@ -73,7 +72,7 @@ function renderTasks() {
         const spanCheck = document.createElement("span");
 
         checkbox.addEventListener("change", () => {
-            task.completed = checkbox.checked;
+            toggleTask(task.id);
             saveTasks();
             renderTasks();
         });
@@ -92,25 +91,18 @@ function renderTasks() {
         const taskActions = document.createElement("div");
         taskActions.className = "taskActions";
 
-        // EDIT
+        // OPEN EDIT MODE
         const editBtn = document.createElement("button");
         editBtn.className = "icon-btn";
         editBtn.innerHTML = "✏️";
-
-        editBtn.addEventListener("click", () => {
-            todoInput.value = task.text;
-            editMode = true;
-            editTaskId = task.id;
-            todoInput.focus();
-        });
+        editBtn.addEventListener("click", () => openEditTask(task));
 
         // DELETE
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "icon-btn";
         deleteBtn.innerHTML = "🗑️";
-
         deleteBtn.addEventListener("click", () => {
-            tasks = tasks.filter(t => t.id !== task.id);
+            deleteTask(task.id);
             saveTasks();
             renderTasks();
         });
@@ -123,7 +115,32 @@ function renderTasks() {
 
         todoList.appendChild(li);
     });
-
-    console.log(tasks);
-    
 }
+
+/* ===== EVENT ===== */
+todoForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const text = todoInput.value.trim();
+    if (!text) return;
+
+    if (editMode) {
+        updateTask(editTaskId, text);
+        editMode = false;
+        editTaskId = null;
+    } else {
+        addTask(text);
+    }
+
+    todoInput.value = "";
+    // Place le curseur directement dans l'input pour faciliter la modification
+    todoInput.focus();
+
+    saveTasks();
+    renderTasks();
+});
+
+
+
+/* ===== INIT ===== */
+renderTasks();
