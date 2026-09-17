@@ -81,7 +81,8 @@ li {
 
 .task-text {
     flex: 1;
-    word-break: break-word;
+    /* Coupe les mots uniquement si nécessaire pour éviter tout débordement */
+    overflow-wrap: anywhere;
 }
 
 /* TASK COMPLETED */
@@ -143,4 +144,20 @@ li {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+/* ----------------------------------------- */
+/* RESPONSIVE DESIGN */
+/* ----------------------------------------- */
+/* Styles for screens 576px and smaller */
+@media (max-width: 576px) {
+
+    body {
+        padding: 1rem;
+    }
+
+    .task-text {
+        font-size: 0.9rem;
+    }
+
 }
